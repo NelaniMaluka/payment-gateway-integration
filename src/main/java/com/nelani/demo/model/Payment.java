@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 /**
  * Encapsulates payment state and enforces valid state transitions.
@@ -51,23 +51,24 @@ public class Payment {
     @NotNull
     @PastOrPresent
     @Column(nullable = false)
-    private LocalDateTime createdAt;
+    private OffsetDateTime createdAt;
 
     @NotNull
     @Future
     @Column(nullable = false)
-    private LocalDateTime expiresAt;
+    private OffsetDateTime expiresAt;
 
     @PastOrPresent
-    private LocalDateTime completedAt;
+    private OffsetDateTime completedAt;
 
     public Payment(String orderId, BigDecimal amount, PaymentStatus status, PaymentProviderType provider,
-            LocalDateTime expiresAt) {
+            OffsetDateTime expiresAt) {
         this.orderId = orderId;
         this.amount = amount;
         this.status = status;
         this.provider = provider;
-        this.createdAt = LocalDateTime.now();
+        this.createdAt = OffsetDateTime
+                .now();
         this.expiresAt = expiresAt;
     }
 
@@ -92,7 +93,8 @@ public class Payment {
 
     public void markSuccess() {
         this.status = PaymentStatus.SUCCESS;
-        this.completedAt = LocalDateTime.now();
+        this.completedAt = OffsetDateTime
+                .now();
     }
 
     public boolean canRetry() {

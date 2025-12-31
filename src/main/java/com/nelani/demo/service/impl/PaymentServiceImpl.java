@@ -8,11 +8,14 @@ import com.nelani.demo.provider.PaymentProvider;
 import com.nelani.demo.repository.PaymentRepository;
 import com.nelani.demo.service.PaymentProviderFactory;
 import com.nelani.demo.service.PaymentService;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -24,6 +27,15 @@ public class PaymentServiceImpl implements PaymentService {
     public PaymentServiceImpl(PaymentRepository paymentRepository, PaymentProviderFactory factory) {
         this.paymentRepository = paymentRepository;
         this.factory = factory;
+    }
+
+    @Override
+    public List<PaymentResponseDTO> getAllPayments(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+
+        var paymentsList = paymentRepository.findAll(pageable);
+
+        return null;
     }
 
     @Override
@@ -63,7 +75,8 @@ public class PaymentServiceImpl implements PaymentService {
                     request.amount(),
                     PaymentStatus.INITIATING,
                     request.provider(),
-                    LocalDateTime.now().plusDays(1));
+                    OffsetDateTime
+                            .now().plusDays(1));
         }
 
         paymentRepository.save(payment); // Save the request

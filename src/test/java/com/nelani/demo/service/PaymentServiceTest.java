@@ -17,7 +17,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
@@ -49,7 +49,8 @@ public class PaymentServiceTest {
                                 BigDecimal.valueOf(100L),
                                 PaymentStatus.PENDING,
                                 PaymentProviderType.OZOW,
-                                LocalDateTime.now().plusDays(1));
+                                OffsetDateTime
+                                                .now().plusDays(1));
                 final PaymentRequestDTO request = new PaymentRequestDTO(payment.getOrderId(), payment.getAmount(),
                                 payment.getProvider());
 
@@ -70,7 +71,8 @@ public class PaymentServiceTest {
                                 BigDecimal.valueOf(100L),
                                 PaymentStatus.SUCCESS,
                                 PaymentProviderType.OZOW,
-                                LocalDateTime.now().plusDays(1));
+                                OffsetDateTime
+                                                .now().plusDays(1));
                 final PaymentRequestDTO request = new PaymentRequestDTO(payment.getOrderId(), payment.getAmount(),
                                 payment.getProvider());
 
@@ -91,7 +93,8 @@ public class PaymentServiceTest {
                                 BigDecimal.valueOf(100L),
                                 PaymentStatus.EXPIRED,
                                 PaymentProviderType.OZOW,
-                                LocalDateTime.now().plusDays(1));
+                                OffsetDateTime
+                                                .now().plusDays(1));
                 final PaymentRequestDTO request = new PaymentRequestDTO(payment.getOrderId(), payment.getAmount(),
                                 payment.getProvider());
 
@@ -112,7 +115,8 @@ public class PaymentServiceTest {
                                 BigDecimal.valueOf(100L),
                                 PaymentStatus.FAILED,
                                 PaymentProviderType.OZOW,
-                                LocalDateTime.now().plusDays(1));
+                                OffsetDateTime
+                                                .now().plusDays(1));
                 final PaymentRequestDTO request = new PaymentRequestDTO(payment.getOrderId(), payment.getAmount(),
                                 payment.getProvider());
 
@@ -137,7 +141,8 @@ public class PaymentServiceTest {
                                 BigDecimal.valueOf(100L),
                                 PaymentStatus.FAILED,
                                 PaymentProviderType.OZOW,
-                                LocalDateTime.now().plusDays(1));
+                                OffsetDateTime
+                                                .now().plusDays(1));
                 final PaymentRequestDTO request = new PaymentRequestDTO(payment.getOrderId(), payment.getAmount(),
                                 payment.getProvider());
 
@@ -162,7 +167,8 @@ public class PaymentServiceTest {
                                 BigDecimal.valueOf(100L),
                                 PaymentStatus.INITIATING,
                                 PaymentProviderType.OZOW,
-                                LocalDateTime.now().plusDays(1));
+                                OffsetDateTime
+                                                .now().plusDays(1));
                 final PaymentRequestDTO request = new PaymentRequestDTO(payment.getOrderId(), payment.getAmount(),
                                 payment.getProvider());
 
