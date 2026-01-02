@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
+import java.util.UUID;
 
 /**
  * Encapsulates payment state and enforces valid state transitions.
@@ -25,7 +26,7 @@ public class Payment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private Long id;
+    private UUID id;
 
     @NotBlank(message = "Order ID is required")
     @Size(max = 100, message = "Order ID must not exceed 100 characters")

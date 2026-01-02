@@ -6,13 +6,16 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
+import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Schema(description = "Response returned after a payment is initialized")
 public record PaymentResponseDTO(
 
-                @Schema(description = "Unique identifier of the payment", example = "pay_9f8a7b6c") @NotBlank(message = "Payment ID is required") String paymentId,
+                @Schema(description = "Unique identifier of the payment", example = "pay_9f8a7b6c") @NotBlank(message = "Order ID is required") String orderId,
+
+                @Schema(description = "Payment amount", example = "199.99") @NotNull(message = "Amount is required") BigDecimal amount,
 
                 @Schema(description = "Payment provider used for the transaction", example = "PAYSTACK") @NotNull(message = "Provider is required") PaymentProviderType provider,
 

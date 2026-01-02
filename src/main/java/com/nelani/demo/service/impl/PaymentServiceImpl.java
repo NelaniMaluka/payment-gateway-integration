@@ -2,20 +2,23 @@ package com.nelani.demo.service.impl;
 
 import com.nelani.demo.dto.PaymentRequestDTO;
 import com.nelani.demo.dto.PaymentResponseDTO;
+import com.nelani.demo.mapper.PaymentMapper;
 import com.nelani.demo.model.Payment;
+import com.nelani.demo.model.PaymentSortField;
 import com.nelani.demo.model.PaymentStatus;
 import com.nelani.demo.provider.PaymentProvider;
 import com.nelani.demo.repository.PaymentRepository;
 import com.nelani.demo.service.PaymentProviderFactory;
 import com.nelani.demo.service.PaymentService;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.OffsetDateTime;
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -30,12 +33,14 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
-    public List<PaymentResponseDTO> getAllPayments(int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
+    public Page<PaymentResponseDTO> getAllPayments(PaymentSortField field, Sort.Direction direction, int page,
+            int size) {
+        Pageable pageable = PageRequest.of(page, size,
+                Sort.by(direction, field.fieldName()));
 
         var paymentsList = paymentRepository.findAll(pageable);
 
-        return null;
+        return paymentsList.map(PaymentMapper::toResponseDTO);
     }
 
     @Override
