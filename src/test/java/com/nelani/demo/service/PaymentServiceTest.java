@@ -52,13 +52,13 @@ public class PaymentServiceTest {
                                 "order1",
                                 BigDecimal.valueOf(100L),
                                 PaymentStatus.PENDING,
-                                PaymentProviderType.OZOW,
+                                PaymentProviderType.PAYPAL,
                                 OffsetDateTime.now().plusDays(1));
                 final Payment payment1 = new Payment(
                                 "order2",
                                 BigDecimal.valueOf(10L),
                                 PaymentStatus.PENDING,
-                                PaymentProviderType.PAYFAST,
+                                PaymentProviderType.STRIPE,
                                 OffsetDateTime.now().plusDays(1));
                 final Page<Payment> resultsList = new PageImpl<>(List.of(payment1, payment), PageRequest.of(0, 10), 1);
 
@@ -87,7 +87,7 @@ public class PaymentServiceTest {
                                 "order1",
                                 BigDecimal.valueOf(100L),
                                 PaymentStatus.PENDING,
-                                PaymentProviderType.OZOW,
+                                PaymentProviderType.PAYPAL,
                                 OffsetDateTime.now().plusDays(1));
                 final PaymentRequestDTO request = new PaymentRequestDTO(payment.getOrderId(), payment.getAmount(),
                                 payment.getProvider());
@@ -108,7 +108,7 @@ public class PaymentServiceTest {
                                 "order1",
                                 BigDecimal.valueOf(100L),
                                 PaymentStatus.SUCCESS,
-                                PaymentProviderType.OZOW,
+                                PaymentProviderType.PAYPAL,
                                 OffsetDateTime
                                                 .now().plusDays(1));
                 final PaymentRequestDTO request = new PaymentRequestDTO(payment.getOrderId(), payment.getAmount(),
@@ -130,7 +130,7 @@ public class PaymentServiceTest {
                                 "order1",
                                 BigDecimal.valueOf(100L),
                                 PaymentStatus.EXPIRED,
-                                PaymentProviderType.OZOW,
+                                PaymentProviderType.STRIPE,
                                 OffsetDateTime
                                                 .now().plusDays(1));
                 final PaymentRequestDTO request = new PaymentRequestDTO(payment.getOrderId(), payment.getAmount(),
@@ -152,7 +152,7 @@ public class PaymentServiceTest {
                                 "order1",
                                 BigDecimal.valueOf(100L),
                                 PaymentStatus.FAILED,
-                                PaymentProviderType.OZOW,
+                                PaymentProviderType.PAYPAL,
                                 OffsetDateTime
                                                 .now().plusDays(1));
                 final PaymentRequestDTO request = new PaymentRequestDTO(payment.getOrderId(), payment.getAmount(),
@@ -178,7 +178,7 @@ public class PaymentServiceTest {
                                 "order1",
                                 BigDecimal.valueOf(100L),
                                 PaymentStatus.FAILED,
-                                PaymentProviderType.OZOW,
+                                PaymentProviderType.PAYPAL,
                                 OffsetDateTime
                                                 .now().plusDays(1));
                 final PaymentRequestDTO request = new PaymentRequestDTO(payment.getOrderId(), payment.getAmount(),
@@ -204,7 +204,7 @@ public class PaymentServiceTest {
                                 "order1",
                                 BigDecimal.valueOf(100L),
                                 PaymentStatus.INITIATING,
-                                PaymentProviderType.OZOW,
+                                PaymentProviderType.STRIPE,
                                 OffsetDateTime
                                                 .now().plusDays(1));
                 final PaymentRequestDTO request = new PaymentRequestDTO(payment.getOrderId(), payment.getAmount(),

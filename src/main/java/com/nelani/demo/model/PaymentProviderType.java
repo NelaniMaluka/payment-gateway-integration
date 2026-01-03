@@ -1,8 +1,6 @@
 package com.nelani.demo.model;
 
 public enum PaymentProviderType {
-    OZOW,
-    PAYFAST,
+    PAYPAL,
     STRIPE,
-    ZAPPER
 }

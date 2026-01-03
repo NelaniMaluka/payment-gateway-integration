@@ -48,7 +48,7 @@ class PaymentControllerTest {
                 final PaymentResponseDTO response = new PaymentResponseDTO(
                                 "pay_123",
                                 BigDecimal.valueOf(100L),
-                                PaymentProviderType.OZOW,
+                                PaymentProviderType.PAYPAL,
                                 "PENDING",
                                 OffsetDateTime.now(),
                                 OffsetDateTime.now().plusDays(1),
@@ -76,12 +76,12 @@ class PaymentControllerTest {
                 final PaymentRequestDTO request = new PaymentRequestDTO(
                                 "ORDER-1",
                                 BigDecimal.valueOf(100),
-                                PaymentProviderType.OZOW);
+                                PaymentProviderType.PAYPAL);
 
                 final PaymentResponseDTO response = new PaymentResponseDTO(
                                 "pay_123",
                                 BigDecimal.valueOf(100L),
-                                PaymentProviderType.OZOW,
+                                PaymentProviderType.PAYPAL,
                                 "PENDING",
                                 OffsetDateTime.now(),
                                 OffsetDateTime.now().plusDays(1),
@@ -99,7 +99,7 @@ class PaymentControllerTest {
                                 .andExpect(status().isOk())
                                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                                 .andExpect(jsonPath("$.orderId").value("pay_123"))
-                                .andExpect(jsonPath("$.provider").value("OZOW"))
+                                .andExpect(jsonPath("$.provider").value("PAYPAL"))
                                 .andExpect(jsonPath("$.status").value("PENDING"))
                                 .andExpect(jsonPath("$.createdAt").exists())
                                 .andExpect(jsonPath("$.expiresAt").exists())

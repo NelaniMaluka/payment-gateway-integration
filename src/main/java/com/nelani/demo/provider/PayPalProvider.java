@@ -5,13 +5,13 @@ import com.nelani.demo.model.Payment;
 import com.nelani.demo.model.PaymentProviderType;
 import org.springframework.stereotype.Service;
 
-// Polymorphism: PayFast-specific implementation of the PaymentProvider interface
+// Polymorphism: PayPal-specific implementation of the PaymentProvider interface
 @Service
-public class PayFastProvider implements PaymentProvider {
+public class PayPalProvider implements PaymentProvider {
 
     @Override
     public PaymentProviderType getType() {
-        return PaymentProviderType.PAYFAST;
+        return PaymentProviderType.PAYPAL;
     }
 
     @Override
