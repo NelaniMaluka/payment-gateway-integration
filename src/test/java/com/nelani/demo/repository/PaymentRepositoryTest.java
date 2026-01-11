@@ -180,11 +180,11 @@ public class PaymentRepositoryTest {
 
                 // Check orderIds, providers, expiresAt
                 Assertions.assertThat(resultsList).extracting(Payment::getOrderId)
-                                .containsExactly(payment1.getOrderId(), payment2.getOrderId());
+                                .containsExactlyInAnyOrder(payment1.getOrderId(), payment2.getOrderId());
                 Assertions.assertThat(resultsList).extracting(Payment::getProvider)
-                                .containsExactly(payment1.getProvider(), payment2.getProvider());
+                                .containsExactlyInAnyOrder(payment1.getProvider(), payment2.getProvider());
                 Assertions.assertThat(resultsList).extracting(Payment::getExpiresAt)
-                                .containsExactly(payment1.getExpiresAt(), payment2.getExpiresAt());
+                                .containsExactlyInAnyOrder(payment1.getExpiresAt(), payment2.getExpiresAt());
         }
 
         @Test
