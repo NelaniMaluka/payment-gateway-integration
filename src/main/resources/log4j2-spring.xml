@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+
+    <Properties>
+        <Property name="LOG_DIR">logs</Property>
+        <Property name="APP_NAME">payment-gateway</Property>
+    </Properties>
+
+    <Appenders>
+
+        <!-- Console appender: logs to system out -->
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout
+                    pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%t] %c{1} - %msg%n"/>
+        </Console>
+
+        <!-- Rolling File appender: daily log files -->
+        <RollingFile name="FileAppender"
+                     fileName="${LOG_DIR}/${APP_NAME}.log"
+        filePattern="${LOG_DIR}/${APP_NAME}-%d{yyyy-MM-dd}.log">
+
+        <PatternLayout>
+            <Pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%t] %c - %msg%n</Pattern>
+        </PatternLayout>
+
+        <!-- Roll at midnight -->
+        <Policies>
+            <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+        </Policies>
+
+        <!-- Keep the last 14 days of logs -->
+        <DefaultRolloverStrategy max="30"/>
+    </RollingFile>
+
+
+    </Appenders>
+
+    <Loggers>
+
+        <!-- Application logs -->
+        <Logger name="com.nelani.demo" level="INFO" additivity="false">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="FileAppender"/>
+        </Logger>
+
+        <!-- Stripe SDK logs: reduce noise -->
+        <Logger name="com.stripe" level="WARN"/>
+
+        <!-- Spring Framework logs -->
+        <Logger name="org.springframework" level="INFO"/>
+
+        <!-- Root logger: anything not captured above -->
+        <Root level="WARN">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="FileAppender"/>
+        </Root>
+
+    </Loggers>
+
+</Configuration>

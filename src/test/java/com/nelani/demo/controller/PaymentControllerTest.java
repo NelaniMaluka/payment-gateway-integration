@@ -47,6 +47,8 @@ class PaymentControllerTest {
                 // Arrange
                 final PaymentResponseDTO response = new PaymentResponseDTO(
                                 "pay_123",
+                                "clientId",
+                                "clientSecret",
                                 BigDecimal.valueOf(100L),
                                 PaymentProviderType.PAYPAL,
                                 "PENDING",
@@ -80,6 +82,8 @@ class PaymentControllerTest {
 
                 final PaymentResponseDTO response = new PaymentResponseDTO(
                                 "pay_123",
+                        "clientId",
+                        "clientSecret",
                                 BigDecimal.valueOf(100L),
                                 PaymentProviderType.PAYPAL,
                                 "PENDING",
@@ -99,10 +103,47 @@ class PaymentControllerTest {
                                 .andExpect(status().isOk())
                                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                                 .andExpect(jsonPath("$.orderId").value("pay_123"))
+                                .andExpect(jsonPath("$.clientId").value("clientId"))
+                                .andExpect(jsonPath("$.clientSecret").value("clientSecret"))
                                 .andExpect(jsonPath("$.provider").value("PAYPAL"))
                                 .andExpect(jsonPath("$.status").value("PENDING"))
                                 .andExpect(jsonPath("$.createdAt").exists())
                                 .andExpect(jsonPath("$.expiresAt").exists())
                                 .andExpect(jsonPath("$.completedAt").doesNotExist());
         }
+
+        @Test
+        void PaymentControllerTest_resumePayment_returnsPaymentResponse() throws Exception {
+                // Arrange
+                final PaymentResponseDTO response = new PaymentResponseDTO(
+                        "pay_123",
+                        "clientId",
+                        "clientSecret",
+                        BigDecimal.valueOf(100L),
+                        PaymentProviderType.PAYPAL,
+                        "PENDING",
+                        OffsetDateTime.now(),
+                        OffsetDateTime.now().plusDays(1),
+                        null
+
+                );
+
+                // Mock
+                when(paymentService.resumePayment(response.getOrderId())).thenReturn(response);
+
+                // Act & Assert
+                mockMvc.perform(post("/api/payments/resume")
+                        .param("orderId", "pay_123"))
+                        .andExpect(status().isOk())
+                        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                        .andExpect(jsonPath("$.orderId").value("pay_123"))
+                        .andExpect(jsonPath("$.clientId").value("clientId"))
+                        .andExpect(jsonPath("$.clientSecret").value("clientSecret"))
+                        .andExpect(jsonPath("$.provider").value("PAYPAL"))
+                        .andExpect(jsonPath("$.status").value("PENDING"))
+                        .andExpect(jsonPath("$.createdAt").exists())
+                        .andExpect(jsonPath("$.expiresAt").exists())
+                        .andExpect(jsonPath("$.completedAt").doesNotExist());
+        }
+
 }

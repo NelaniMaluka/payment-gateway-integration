@@ -16,9 +16,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.OffsetDateTime;
 import java.util.Optional;
 
 @Service
@@ -33,6 +33,7 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<PaymentResponseDTO> getAllPayments(PaymentSortField field, Sort.Direction direction, int page,
             int size) {
         Pageable pageable = PageRequest.of(page, size,
@@ -40,12 +41,12 @@ public class PaymentServiceImpl implements PaymentService {
 
         var paymentsList = paymentRepository.findAll(pageable);
 
-        return paymentsList.map(PaymentMapper::toResponseDTO);
+        return paymentsList.map(payment -> PaymentMapper.toResponseDTO(payment, null, null));
     }
 
     @Override
+    @Transactional
     public PaymentResponseDTO initializePayment(PaymentRequestDTO request) {
-
         Payment payment;
 
         // Check if the payment request exists
@@ -53,24 +54,16 @@ public class PaymentServiceImpl implements PaymentService {
 
         if (existingPayment.isPresent()) {
             payment = existingPayment.get();
+            payment.expireIfNeeded();
+            paymentRepository.save(payment);
 
             // If the request exists, update it or throw an error accordingly
-            switch (payment.getStatus()) {
-
-                case PENDING ->
-                    throw new ResponseStatusException(HttpStatus.CONFLICT,
-                            "An active payment already exists for this order.");
-
-                case SUCCESS ->
-                    throw new ResponseStatusException(HttpStatus.CONFLICT,
-                            "Order already paid.");
-
-                case EXPIRED ->
-                    throw new ResponseStatusException(HttpStatus.CONFLICT,
-                            "Order already expired.");
-
-                case INITIATING, FAILED ->
-                    payment.markInitiating();
+            if (payment.canBeReinitialized()) {
+                payment.markInitiating();
+            } else if (payment.getStatus() == PaymentStatus.SUCCESS) {
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "Order already paid.");
+            } else if (payment.getStatus() == PaymentStatus.PENDING) {
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "Resume payment.");
             }
 
         } else {
@@ -79,15 +72,54 @@ public class PaymentServiceImpl implements PaymentService {
                     request.orderId(),
                     request.amount(),
                     PaymentStatus.INITIATING,
-                    request.provider(),
-                    OffsetDateTime
-                            .now().plusDays(1));
+                    request.provider());
+
+            paymentRepository.save(payment); // Save the request
         }
 
-        paymentRepository.save(payment); // Save the request
+        // Call the payment provider and create the payment
+        final PaymentProvider provider = factory.get(payment.getProvider());
+        PaymentResponseDTO responseDTO = provider.createPayment(payment);
 
-        PaymentProvider provider = factory.get(payment.getProvider());
+        // Update the existing Payment and save it to the DB
+        payment.setProviderReference(responseDTO.getClientId());
+        payment.markPending(responseDTO.getProvider());
+        paymentRepository.save(payment);
 
-        return provider.createPayment(payment);
+        return responseDTO;
     }
+
+    @Override
+    @Transactional
+    public PaymentResponseDTO resumePayment(String orderId) {
+        // Get the payment by orderId
+        Payment payment = paymentRepository.findByOrderId(orderId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Payment not found."));
+
+        // Check if the payment is expired
+        payment.expireIfNeeded();
+        paymentRepository.save(payment);
+
+        if (payment.isExpired()) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Payment session expired.");
+        }
+
+        // Only allow the payment if its in Pending State
+        if (!payment.canBeResumed()) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "Payment cannot be resumed. Current status: " + payment.getStatus());
+        }
+
+        // Resume the payment
+        PaymentProvider provider = factory.get(payment.getProvider());
+        if (!provider.supportsResume()) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Payment provider does not support resume");
+        }
+
+        return provider.resumePayment(payment);
+    }
+
 }

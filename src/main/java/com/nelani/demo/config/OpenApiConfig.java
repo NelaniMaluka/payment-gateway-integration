@@ -24,7 +24,7 @@ public class OpenApiConfig {
                                                                 API documentation for a demo Payment Gateway backend.
 
                                                                 This service demonstrates:
-                                                                - Multi-provider payment routing Ozow, PayFast, Stripe, Zapper, etc.)
+                                                                - Multi-provider payment routing Stripe, PayPal, etc.)
                                                                 - Asynchronous payment processing
                                                                 - Webhook-based payment confirmation
                                                                 - Clean architecture using Spring Boot

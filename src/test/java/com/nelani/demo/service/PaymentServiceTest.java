@@ -20,7 +20,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
-import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -52,14 +51,12 @@ public class PaymentServiceTest {
                                 "order1",
                                 BigDecimal.valueOf(100L),
                                 PaymentStatus.PENDING,
-                                PaymentProviderType.PAYPAL,
-                                OffsetDateTime.now().plusDays(1));
+                                PaymentProviderType.PAYPAL);
                 final Payment payment1 = new Payment(
                                 "order2",
                                 BigDecimal.valueOf(10L),
                                 PaymentStatus.PENDING,
-                                PaymentProviderType.STRIPE,
-                                OffsetDateTime.now().plusDays(1));
+                                PaymentProviderType.STRIPE);
                 final Page<Payment> resultsList = new PageImpl<>(List.of(payment1, payment), PageRequest.of(0, 10), 1);
 
                 // Stub
@@ -69,14 +66,14 @@ public class PaymentServiceTest {
                 // Act & Assert
                 var results = paymentService.getAllPayments(PaymentSortField.AMOUNT, Sort.Direction.DESC, 0, 10);
                 Assertions.assertThat(results.getTotalElements()).isEqualTo(resultsList.getTotalElements());
-                Assertions.assertThat(results.stream().findFirst().get().amount()).isEqualTo(payment1.getAmount());
-                Assertions.assertThat(results).extracting(PaymentResponseDTO::orderId).contains(payment.getOrderId(),
+                Assertions.assertThat(results.stream().findFirst().get().getAmount()).isEqualTo(payment1.getAmount());
+                Assertions.assertThat(results).extracting(PaymentResponseDTO::getOrderId).contains(payment.getOrderId(),
                                 payment1.getOrderId());
-                Assertions.assertThat(results).extracting(PaymentResponseDTO::provider).contains(payment.getProvider(),
+                Assertions.assertThat(results).extracting(PaymentResponseDTO::getProvider).contains(payment.getProvider(),
                                 payment1.getProvider());
-                Assertions.assertThat(results).extracting(PaymentResponseDTO::createdAt)
+                Assertions.assertThat(results).extracting(PaymentResponseDTO::getCreatedAt)
                                 .contains(payment.getCreatedAt(), payment1.getCreatedAt());
-                Assertions.assertThat(results).extracting(PaymentResponseDTO::expiresAt)
+                Assertions.assertThat(results).extracting(PaymentResponseDTO::getExpiresAt)
                                 .contains(payment.getExpiresAt(), payment1.getExpiresAt());
         }
 
@@ -87,8 +84,7 @@ public class PaymentServiceTest {
                                 "order1",
                                 BigDecimal.valueOf(100L),
                                 PaymentStatus.PENDING,
-                                PaymentProviderType.PAYPAL,
-                                OffsetDateTime.now().plusDays(1));
+                                PaymentProviderType.PAYPAL);
                 final PaymentRequestDTO request = new PaymentRequestDTO(payment.getOrderId(), payment.getAmount(),
                                 payment.getProvider());
 
@@ -98,7 +94,7 @@ public class PaymentServiceTest {
                 // Assert
                 assertThatThrownBy(() -> paymentService.initializePayment(request))
                                 .isInstanceOf(ResponseStatusException.class)
-                                .hasMessageContaining("An active payment already exists for this order.");
+                                .hasMessageContaining("Resume payment.");
         }
 
         @Test
@@ -108,9 +104,7 @@ public class PaymentServiceTest {
                                 "order1",
                                 BigDecimal.valueOf(100L),
                                 PaymentStatus.SUCCESS,
-                                PaymentProviderType.PAYPAL,
-                                OffsetDateTime
-                                                .now().plusDays(1));
+                                PaymentProviderType.PAYPAL);
                 final PaymentRequestDTO request = new PaymentRequestDTO(payment.getOrderId(), payment.getAmount(),
                                 payment.getProvider());
 
@@ -124,25 +118,43 @@ public class PaymentServiceTest {
         }
 
         @Test
-        public void PaymentServiceTest_InitializePayment_ReturnsExpiredError() {
+        public void PaymentServiceTest_InitializePayment__ReturnsSuccess_WhenExpired() {
                 // Arrange
                 final Payment payment = new Payment(
                                 "order1",
                                 BigDecimal.valueOf(100L),
                                 PaymentStatus.EXPIRED,
-                                PaymentProviderType.STRIPE,
-                                OffsetDateTime
-                                                .now().plusDays(1));
+                                PaymentProviderType.STRIPE);
                 final PaymentRequestDTO request = new PaymentRequestDTO(payment.getOrderId(), payment.getAmount(),
                                 payment.getProvider());
+                final PaymentResponseDTO responseDTO =  new PaymentResponseDTO(
+                        payment.getOrderId(),
+                        "clientId",
+                        "clientSecret",
+                        payment.getAmount(),
+                        payment.getProvider(),
+                        null,
+                        null,
+                        null,
+                        null
+                );
 
                 // Stub
-                when(paymentRepository.findByOrderId(anyString())).thenReturn(Optional.of(payment));
+                when(paymentRepository.findByOrderId(anyString()))
+                        .thenReturn(Optional.of(payment));
+                when(factory.get(any(PaymentProviderType.class)))
+                        .thenReturn(provider);
+                when(provider.createPayment(any(Payment.class)))
+                        .thenReturn(responseDTO);
 
                 // Assert
-                assertThatThrownBy(() -> paymentService.initializePayment(request))
-                                .isInstanceOf(ResponseStatusException.class)
-                                .hasMessageContaining("Order already expired.");
+                var result = paymentService.initializePayment(request);
+                Assertions.assertThat(result).isNotNull();
+                Assertions.assertThat(result.getOrderId()).isEqualTo(responseDTO.getOrderId());
+                Assertions.assertThat(result.getClientId()).isEqualTo(responseDTO.getClientId());
+                Assertions.assertThat(result.getClientSecret()).isEqualTo(responseDTO.getClientSecret());
+                Assertions.assertThat(result.getAmount()).isEqualTo(responseDTO.getAmount());
+                Assertions.assertThat(result.getProvider()).isEqualTo(responseDTO.getProvider());
         }
 
         @Test
@@ -152,11 +164,20 @@ public class PaymentServiceTest {
                                 "order1",
                                 BigDecimal.valueOf(100L),
                                 PaymentStatus.FAILED,
-                                PaymentProviderType.PAYPAL,
-                                OffsetDateTime
-                                                .now().plusDays(1));
+                                PaymentProviderType.PAYPAL);
                 final PaymentRequestDTO request = new PaymentRequestDTO(payment.getOrderId(), payment.getAmount(),
                                 payment.getProvider());
+                final PaymentResponseDTO responseDTO =  new PaymentResponseDTO(
+                        payment.getOrderId(),
+                        "clientId",
+                        "clientSecret",
+                        payment.getAmount(),
+                        payment.getProvider(),
+                        null,
+                        null,
+                        null,
+                        null
+                );
 
                 // Stub
                 when(paymentRepository.findByOrderId(anyString()))
@@ -164,11 +185,16 @@ public class PaymentServiceTest {
                 when(factory.get(any(PaymentProviderType.class)))
                                 .thenReturn(provider);
                 when(provider.createPayment(any(Payment.class)))
-                                .thenReturn(null);
+                        .thenReturn(responseDTO);
 
                 // Assert
                 var result = paymentService.initializePayment(request);
-                Assertions.assertThat(result).isNull();
+                Assertions.assertThat(result).isNotNull();
+                Assertions.assertThat(result.getOrderId()).isEqualTo(responseDTO.getOrderId());
+                Assertions.assertThat(result.getClientId()).isEqualTo(responseDTO.getClientId());
+                Assertions.assertThat(result.getClientSecret()).isEqualTo(responseDTO.getClientSecret());
+                Assertions.assertThat(result.getAmount()).isEqualTo(responseDTO.getAmount());
+                Assertions.assertThat(result.getProvider()).isEqualTo(responseDTO.getProvider());
         }
 
         @Test
@@ -178,11 +204,20 @@ public class PaymentServiceTest {
                                 "order1",
                                 BigDecimal.valueOf(100L),
                                 PaymentStatus.FAILED,
-                                PaymentProviderType.PAYPAL,
-                                OffsetDateTime
-                                                .now().plusDays(1));
+                                PaymentProviderType.PAYPAL);
                 final PaymentRequestDTO request = new PaymentRequestDTO(payment.getOrderId(), payment.getAmount(),
                                 payment.getProvider());
+                final PaymentResponseDTO responseDTO =  new PaymentResponseDTO(
+                        payment.getOrderId(),
+                        "clientId",
+                        "clientSecret",
+                        payment.getAmount(),
+                        payment.getProvider(),
+                        null,
+                        null,
+                        null,
+                        null
+                );
 
                 // Stub
                 when(paymentRepository.findByOrderId(anyString()))
@@ -190,11 +225,16 @@ public class PaymentServiceTest {
                 when(factory.get(any(PaymentProviderType.class)))
                                 .thenReturn(provider);
                 when(provider.createPayment(any(Payment.class)))
-                                .thenReturn(null);
+                                .thenReturn(responseDTO);
 
                 // Assert
                 var result = paymentService.initializePayment(request);
-                Assertions.assertThat(result).isNull();
+                Assertions.assertThat(result).isNotNull();
+                Assertions.assertThat(result.getOrderId()).isEqualTo(responseDTO.getOrderId());
+                Assertions.assertThat(result.getClientId()).isEqualTo(responseDTO.getClientId());
+                Assertions.assertThat(result.getClientSecret()).isEqualTo(responseDTO.getClientSecret());
+                Assertions.assertThat(result.getAmount()).isEqualTo(responseDTO.getAmount());
+                Assertions.assertThat(result.getProvider()).isEqualTo(responseDTO.getProvider());
         }
 
         @Test
@@ -204,11 +244,20 @@ public class PaymentServiceTest {
                                 "order1",
                                 BigDecimal.valueOf(100L),
                                 PaymentStatus.INITIATING,
-                                PaymentProviderType.STRIPE,
-                                OffsetDateTime
-                                                .now().plusDays(1));
+                                PaymentProviderType.STRIPE);
                 final PaymentRequestDTO request = new PaymentRequestDTO(payment.getOrderId(), payment.getAmount(),
                                 payment.getProvider());
+                final PaymentResponseDTO responseDTO =  new PaymentResponseDTO(
+                        payment.getOrderId(),
+                        "clientId",
+                        "clientSecret",
+                        payment.getAmount(),
+                        payment.getProvider(),
+                        null,
+                        null,
+                        null,
+                        null
+                );
 
                 // Stub
                 when(paymentRepository.findByOrderId(anyString()))
@@ -216,11 +265,105 @@ public class PaymentServiceTest {
                 when(factory.get(any(PaymentProviderType.class)))
                                 .thenReturn(provider);
                 when(provider.createPayment(any(Payment.class)))
-                                .thenReturn(null);
+                                .thenReturn(responseDTO);
 
                 // Assert
                 var result = paymentService.initializePayment(request);
-                Assertions.assertThat(result).isNull();
+                Assertions.assertThat(result).isNotNull();
+                Assertions.assertThat(result.getOrderId()).isEqualTo(responseDTO.getOrderId());
+                Assertions.assertThat(result.getClientId()).isEqualTo(responseDTO.getClientId());
+                Assertions.assertThat(result.getClientSecret()).isEqualTo(responseDTO.getClientSecret());
+                Assertions.assertThat(result.getAmount()).isEqualTo(responseDTO.getAmount());
+                Assertions.assertThat(result.getProvider()).isEqualTo(responseDTO.getProvider());
         }
+
+        @Test
+        public void PaymentServiceTest_ResumePayment_ReturnsSuccess_WhenPending() {
+                // Arrange
+                final Payment payment = new Payment(
+                        "order1",
+                        BigDecimal.valueOf(100L),
+                        PaymentStatus.PENDING,
+                        PaymentProviderType.STRIPE);
+                final PaymentResponseDTO responseDTO =  new PaymentResponseDTO(
+                        payment.getOrderId(),
+                        "clientId",
+                        "clientSecret",
+                        payment.getAmount(),
+                        payment.getProvider(),
+                        null,
+                        null,
+                        null,
+                        null
+                );
+
+                // Stub
+                when(paymentRepository.findByOrderId(anyString()))
+                        .thenReturn(Optional.of(payment));
+                when(factory.get(any(PaymentProviderType.class)))
+                        .thenReturn(provider);
+                when(provider.resumePayment(any(Payment.class)))
+                        .thenReturn(responseDTO);
+                when(provider.supportsResume()).thenReturn(true);
+
+                // Assert
+                var result = paymentService.resumePayment(payment.getOrderId());
+                Assertions.assertThat(result).isNotNull();
+                Assertions.assertThat(result.getOrderId()).isEqualTo(responseDTO.getOrderId());
+                Assertions.assertThat(result.getClientId()).isEqualTo(responseDTO.getClientId());
+                Assertions.assertThat(result.getClientSecret()).isEqualTo(responseDTO.getClientSecret());
+                Assertions.assertThat(result.getAmount()).isEqualTo(responseDTO.getAmount());
+                Assertions.assertThat(result.getProvider()).isEqualTo(responseDTO.getProvider());
+        }
+
+        @Test
+        public void PaymentServiceTest_ResumePayment_ReturnsError_WhenPaymentNotFound() {
+                // Arrange
+                final Payment payment = new Payment(
+                        "order1",
+                        BigDecimal.valueOf(100L),
+                        PaymentStatus.PENDING,
+                        PaymentProviderType.STRIPE);
+
+                // Assert
+                assertThatThrownBy(() -> paymentService.resumePayment(payment.getOrderId()))
+                        .isInstanceOf(ResponseStatusException.class)
+                        .hasMessageContaining("Payment not found.");
+        }
+
+        @Test
+        void resumePayment_shouldThrowExpired_whenStatusIsExpired() {
+                Payment payment = new Payment(
+                        "order1",
+                        BigDecimal.valueOf(100),
+                        PaymentStatus.EXPIRED,
+                        PaymentProviderType.STRIPE
+                );
+
+                when(paymentRepository.findByOrderId(anyString()))
+                        .thenReturn(Optional.of(payment));
+
+                assertThatThrownBy(() -> paymentService.resumePayment("order1"))
+                        .isInstanceOf(ResponseStatusException.class)
+                        .hasMessageContaining("Payment cannot be resumed. Current status: EXPIRED");
+        }
+
+        @Test
+        void resumePayment_shouldThrowExpired_whenStatusIsInitiating() {
+                Payment payment = new Payment(
+                        "order1",
+                        BigDecimal.valueOf(100),
+                        PaymentStatus.INITIATING,
+                        PaymentProviderType.STRIPE
+                );
+
+                when(paymentRepository.findByOrderId(anyString()))
+                        .thenReturn(Optional.of(payment));
+
+                assertThatThrownBy(() -> paymentService.resumePayment("order1"))
+                        .isInstanceOf(ResponseStatusException.class)
+                        .hasMessageContaining("Payment cannot be resumed. Current status: INITIATING");
+        }
+
 
 }

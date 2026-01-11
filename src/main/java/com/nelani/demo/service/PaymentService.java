@@ -13,4 +13,5 @@ public interface PaymentService {
 
     PaymentResponseDTO initializePayment(PaymentRequestDTO request);
 
+    PaymentResponseDTO resumePayment(String orderId);
 }

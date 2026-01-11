@@ -53,4 +53,18 @@ public class PaymentController {
                 var result = paymentService.initializePayment(request);
                 return ResponseEntity.ok(result);
         }
+
+        @Operation(summary = "Resume an existing payment", description = """
+                        Resumes a previously created payment session using the order ID.
+                        If the payment is still valid and not completed, the existing
+                        provider session is returned.
+                        """)
+        @ApiResponse(responseCode = "200", description = "Payment session resumed successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = PaymentResponseDTO.class)))
+        @PostMapping("/resume")
+        public ResponseEntity<PaymentResponseDTO> resumePayment(
+                        @Parameter(description = "Order ID of the existing payment to resume", example = "ORD-2026-000123", required = true) @Valid String orderId) {
+                var result = paymentService.resumePayment(orderId);
+                return ResponseEntity.ok(result);
+        }
+
 }

@@ -11,9 +11,9 @@ import java.math.BigDecimal;
 @Schema(description = "Request payload used to initialize a payment")
 public record PaymentRequestDTO(
 
-                @Schema(description = "Client-side or system order identifier associated with this payment", example = "ORD-2025-0001") @NotBlank(message = "Order ID is required") String orderId,
+        @Schema(description = "Client-side or system order identifier associated with this payment", example = "ORD-2025-0001") @NotBlank(message = "Order ID is required") String orderId,
 
-                @Schema(description = "Amount to be charged for the payment", example = "150.00", minimum = "0.01") @NotNull(message = "Amount is required") @DecimalMin(value = "0.01", message = "Amount must be greater than zero") BigDecimal amount,
+        @Schema(description = "Amount to be charged for the payment", example = "150.00", minimum = "0.01") @NotNull(message = "Amount is required") @DecimalMin(value = "0.01", message = "Amount must be greater than zero") BigDecimal amount,
 
-                @Schema(description = "Payment provider to process the transaction", example = "PAYSTACK") @NotNull(message = "Provider is required") PaymentProviderType provider) {
+        @Schema(description = "Payment provider to process the transaction", example = "STRIPE") @NotNull(message = "Provider is required") PaymentProviderType provider) {
 }

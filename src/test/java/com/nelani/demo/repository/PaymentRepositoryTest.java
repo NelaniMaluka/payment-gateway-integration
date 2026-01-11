@@ -35,14 +35,12 @@ public class PaymentRepositoryTest {
                                 "order1",
                                 BigDecimal.valueOf(100L),
                                 PaymentStatus.PENDING,
-                                PaymentProviderType.PAYPAL,
-                                now.plusDays(1));
+                                PaymentProviderType.PAYPAL);
                 final Payment payment2 = new Payment(
                                 "order2",
                                 BigDecimal.valueOf(10L),
                                 PaymentStatus.PENDING,
-                                PaymentProviderType.STRIPE,
-                                now.plusDays(1));
+                                PaymentProviderType.STRIPE);
 
                 paymentRepository.saveAll(List.of(payment1, payment2));
 
@@ -77,14 +75,12 @@ public class PaymentRepositoryTest {
                                 "order1",
                                 BigDecimal.valueOf(100L),
                                 PaymentStatus.INITIATING,
-                                PaymentProviderType.PAYPAL,
-                                now.plusDays(1));
+                                PaymentProviderType.PAYPAL);
                 final Payment payment2 = new Payment(
                                 "order2",
                                 BigDecimal.valueOf(10L),
                                 PaymentStatus.PENDING,
-                                PaymentProviderType.STRIPE,
-                                now.plusDays(1));
+                                PaymentProviderType.STRIPE);
 
                 paymentRepository.saveAll(List.of(payment1, payment2));
 
@@ -119,14 +115,12 @@ public class PaymentRepositoryTest {
                                 "order1",
                                 BigDecimal.valueOf(100L),
                                 PaymentStatus.INITIATING,
-                                PaymentProviderType.PAYPAL,
-                                now.plusDays(1));
+                                PaymentProviderType.PAYPAL);
                 final Payment payment2 = new Payment(
                                 "order2",
                                 BigDecimal.valueOf(10L),
                                 PaymentStatus.PENDING,
-                                PaymentProviderType.STRIPE,
-                                now.plusDays(1));
+                                PaymentProviderType.STRIPE);
 
                 paymentRepository.saveAll(List.of(payment1, payment2));
 
@@ -161,14 +155,12 @@ public class PaymentRepositoryTest {
                                 "order1",
                                 BigDecimal.valueOf(100L),
                                 PaymentStatus.INITIATING,
-                                PaymentProviderType.PAYPAL,
-                                now.plusDays(30));
+                                PaymentProviderType.PAYPAL);
                 final Payment payment2 = new Payment(
                                 "order2",
                                 BigDecimal.valueOf(10L),
                                 PaymentStatus.PENDING,
-                                PaymentProviderType.STRIPE,
-                                now.plusDays(1));
+                                PaymentProviderType.STRIPE);
 
                 paymentRepository.saveAll(List.of(payment1, payment2));
 
@@ -203,14 +195,12 @@ public class PaymentRepositoryTest {
                                 "order1",
                                 BigDecimal.valueOf(100L),
                                 PaymentStatus.INITIATING,
-                                PaymentProviderType.PAYPAL,
-                                now.plusDays(30));
+                                PaymentProviderType.PAYPAL);
                 final Payment payment2 = new Payment(
                                 "order2",
                                 BigDecimal.valueOf(10L),
                                 PaymentStatus.PENDING,
-                                PaymentProviderType.STRIPE,
-                                now.plusDays(1));
+                                PaymentProviderType.STRIPE);
 
                 paymentRepository.saveAll(List.of(payment1, payment2));
 
@@ -245,14 +235,12 @@ public class PaymentRepositoryTest {
                                 "order1",
                                 BigDecimal.valueOf(100L),
                                 PaymentStatus.INITIATING,
-                                PaymentProviderType.PAYPAL,
-                                now.plusDays(30));
+                                PaymentProviderType.PAYPAL);
                 final Payment payment2 = new Payment(
                                 "order2",
                                 BigDecimal.valueOf(10L),
                                 PaymentStatus.PENDING,
-                                PaymentProviderType.STRIPE,
-                                now.plusDays(1));
+                                PaymentProviderType.STRIPE);
 
                 paymentRepository.saveAll(List.of(payment1, payment2));
 
