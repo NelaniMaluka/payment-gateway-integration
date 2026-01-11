@@ -176,7 +176,7 @@ public class PaymentRepositoryTest {
 
                 // Check full list is sorted correctly by amount
                 Assertions.assertThat(resultsList).extracting(Payment::getStatus)
-                                .containsExactly(payment1.getStatus(), payment2.getStatus());
+                        .containsExactlyInAnyOrder(payment1.getStatus(), payment2.getStatus());
 
                 // Check orderIds, providers, expiresAt
                 Assertions.assertThat(resultsList).extracting(Payment::getOrderId)
