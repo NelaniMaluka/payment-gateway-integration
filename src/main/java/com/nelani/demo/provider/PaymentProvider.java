@@ -26,14 +26,6 @@ public interface PaymentProvider {
     PaymentResponseDTO createPayment(Payment payment);
 
     /**
-     * Resumes an existing payment session.
-     *
-     * @param payment domain payment object
-     * @return provider response containing updated payment details
-     */
-    PaymentResponseDTO resumePayment(Payment payment);
-
-    /**
      * Indicates whether this provider supports resuming payment sessions.
      *
      * Defaults too false to be safe.
@@ -41,6 +33,14 @@ public interface PaymentProvider {
     default boolean supportsResume() {
         return false;
     }
+
+    /**
+     * Resumes an existing payment session.
+     *
+     * @param payment domain payment object
+     * @return provider response containing updated payment details
+     */
+    PaymentResponseDTO resumePayment(Payment payment);
 
     /**
      * Handles incoming provider webhooks.

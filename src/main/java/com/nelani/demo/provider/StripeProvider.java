@@ -88,7 +88,11 @@ public class StripeProvider implements PaymentProvider {
                         params.put("receipt_email", "JohnDoe@gmail.com");
                         params.put("description", "Order " + payment.getOrderId());
                         params.put("statement_descriptor_suffix", "NELANI");
-                        params.put("automatic_payment_methods", Map.of("enabled", true));
+
+                        Map<String, Object> autoPaymentMethods = new HashMap<>();
+                        autoPaymentMethods.put("enabled", true);
+
+                        params.put("automatic_payment_methods", autoPaymentMethods);
 
                         int itemCount = ThreadLocalRandom.current().nextInt(1, 6);
 
@@ -174,6 +178,11 @@ public class StripeProvider implements PaymentProvider {
         }
 
         @Override
+        public boolean supportsResume() {
+                return true;
+        }
+
+        @Override
         @Retryable(retryFor = PaymentProviderTemporaryException.class, maxAttempts = 3, backoff = @Backoff(delay = 1000, multiplier = 2))
         public PaymentResponseDTO resumePayment(Payment payment) {
 
@@ -243,11 +252,6 @@ public class StripeProvider implements PaymentProvider {
                         throw new PaymentProviderTemporaryException(
                                         "Stripe payment temporarily unavailable");
                 }
-        }
-
-        @Override
-        public boolean supportsResume() {
-                return true;
         }
 
         @Override
